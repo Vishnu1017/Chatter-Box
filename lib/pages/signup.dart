@@ -21,6 +21,7 @@ class _SignUpState extends State<SignUp> {
   TextEditingController confirmPasswordController = new TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
+  bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -28,6 +29,9 @@ class _SignUpState extends State<SignUp> {
     // ignore: unnecessary_null_comparison
     if (password != null && password == confirmPassword) {
       try {
+        setState(() {
+          _isLoading = true; // Start loading
+        });
         // ignore: unused_local_variable
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
@@ -76,6 +80,9 @@ class _SignUpState extends State<SignUp> {
                       profileurl: '',
                     )));
       } on FirebaseException catch (e) {
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
         if (e.code == 'weak password') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -97,6 +104,10 @@ class _SignUpState extends State<SignUp> {
             ),
           );
         }
+      } finally {
+        setState(() {
+          _isLoading = false; // Stop loading in any case
+        });
       }
     }
   }
@@ -112,9 +123,13 @@ class _SignUpState extends State<SignUp> {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                    colors: [Color(0xFF7f30fe), Color(0xFF6380fb)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight),
+                  colors: [
+                    Color(0xFF4A90E2),
+                    Color(0xFF007AFF)
+                  ], // Updated to blue shades
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.vertical(
                   bottom:
                       Radius.elliptical(MediaQuery.of(context).size.width, 105),
@@ -129,18 +144,20 @@ class _SignUpState extends State<SignUp> {
                     child: Text(
                       "SigUn",
                       style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold),
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  const Center(
+                  Center(
                     child: Text(
                       "Create a New Account",
                       style: TextStyle(
-                          color: Color(0xFFbbb0ff),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500),
+                        color: Colors.blue[200],
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                   Form(
@@ -183,7 +200,8 @@ class _SignUpState extends State<SignUp> {
                                               vertical: 15),
                                       prefixIcon: const Icon(
                                           Icons.person_outline,
-                                          color: Color(0xFF7f30fe)),
+                                          color:
+                                              Color.fromARGB(255, 26, 95, 242)),
                                       hintText: "Enter your name",
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
@@ -193,7 +211,9 @@ class _SignUpState extends State<SignUp> {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
                                         borderSide: const BorderSide(
-                                            width: 1, color: Color(0xFF7f30fe)),
+                                            width: 1,
+                                            color: Color.fromARGB(
+                                                255, 26, 95, 242)),
                                       ),
                                       errorBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
@@ -226,7 +246,8 @@ class _SignUpState extends State<SignUp> {
                                               vertical: 15),
                                       prefixIcon: const Icon(
                                           Icons.mail_outlined,
-                                          color: Color(0xFF7f30fe)),
+                                          color:
+                                              Color.fromARGB(255, 26, 95, 242)),
                                       hintText: "Enter your email",
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
@@ -236,7 +257,9 @@ class _SignUpState extends State<SignUp> {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
                                         borderSide: const BorderSide(
-                                            width: 1, color: Color(0xFF7f30fe)),
+                                            width: 1,
+                                            color: Color.fromARGB(
+                                                255, 26, 95, 242)),
                                       ),
                                       errorBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
@@ -273,13 +296,15 @@ class _SignUpState extends State<SignUp> {
                                           const EdgeInsets.symmetric(
                                               vertical: 15),
                                       prefixIcon: const Icon(Icons.password,
-                                          color: Color(0xFF7f30fe)),
+                                          color:
+                                              Color.fromARGB(255, 26, 95, 242)),
                                       suffixIcon: IconButton(
                                         icon: Icon(
                                           _obscurePassword
                                               ? Icons.visibility_off_outlined
                                               : Icons.visibility,
-                                          color: const Color(0xFF7f30fe),
+                                          color: const Color.fromARGB(
+                                              255, 26, 95, 242),
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -297,7 +322,9 @@ class _SignUpState extends State<SignUp> {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
                                         borderSide: const BorderSide(
-                                            width: 1, color: Color(0xFF7f30fe)),
+                                            width: 1,
+                                            color: Color.fromARGB(
+                                                255, 26, 95, 242)),
                                       ),
                                       errorBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
@@ -332,13 +359,15 @@ class _SignUpState extends State<SignUp> {
                                           const EdgeInsets.symmetric(
                                               vertical: 15),
                                       prefixIcon: const Icon(Icons.password,
-                                          color: Color(0xFF7f30fe)),
+                                          color:
+                                              Color.fromARGB(255, 26, 95, 242)),
                                       suffixIcon: IconButton(
                                         icon: Icon(
                                           _obscureConfirmPassword
                                               ? Icons.visibility_off_outlined
                                               : Icons.visibility,
-                                          color: const Color(0xFF7f30fe),
+                                          color: const Color.fromARGB(
+                                              255, 26, 95, 242),
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -356,7 +385,9 @@ class _SignUpState extends State<SignUp> {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
                                         borderSide: const BorderSide(
-                                            width: 1, color: Color(0xFF7f30fe)),
+                                            width: 1,
+                                            color: Color.fromARGB(
+                                                255, 26, 95, 242)),
                                       ),
                                       errorBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(5),
@@ -376,40 +407,66 @@ class _SignUpState extends State<SignUp> {
                                   ),
                                   const SizedBox(height: 40),
                                   Center(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_formkey.currentState!.validate()) {
-                                          setState(() {
-                                            name = nameController.text;
-                                            email = emailController.text;
-                                            password = passwordController.text;
-                                            confirmPassword =
-                                                confirmPasswordController.text;
-                                          });
-                                        }
-                                        registration();
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 12, horizontal: 28),
-                                        backgroundColor:
-                                            const Color(0xFF6380fb),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        shadowColor: Colors.black,
-                                        elevation: 8,
-                                      ),
-                                      child: const Text(
-                                        "Sign Up",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
+                                    child:
+                                        _isLoading // Show loading indicator if _isLoading is true
+                                            ? Container(
+                                                width: 60, // Custom width
+                                                height: 60, // Custom height
+                                                child:
+                                                    const CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                              Color>(
+                                                          Colors
+                                                              .blue), // Custom color
+                                                  strokeWidth:
+                                                      6.0, // Custom stroke width
+                                                ),
+                                              )
+                                            : ElevatedButton(
+                                                onPressed: () {
+                                                  if (_formkey.currentState!
+                                                      .validate()) {
+                                                    setState(() {
+                                                      name =
+                                                          nameController.text;
+                                                      email =
+                                                          emailController.text;
+                                                      password =
+                                                          passwordController
+                                                              .text;
+                                                      confirmPassword =
+                                                          confirmPasswordController
+                                                              .text;
+                                                    });
+                                                  }
+                                                  registration();
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 12,
+                                                      horizontal: 28),
+                                                  backgroundColor:
+                                                      const Color.fromARGB(
+                                                          255, 26, 95, 242),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                  ),
+                                                  shadowColor: Colors.black,
+                                                  elevation: 8,
+                                                ),
+                                                child: const Text(
+                                                  "Sign Up",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
                                   ),
                                 ],
                               ),
@@ -439,7 +496,8 @@ class _SignUpState extends State<SignUp> {
                         child: const Text(
                           "Sign In Now!",
                           style: TextStyle(
-                              color: Color(0xFF7f30fe), // Button text color
+                              color: Color.fromARGB(
+                                  255, 26, 95, 242), // Button text color
                               fontWeight: FontWeight.bold,
                               fontSize: 18),
                         ),

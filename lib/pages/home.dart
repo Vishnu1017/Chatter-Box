@@ -78,23 +78,34 @@ class _HomeState extends State<Home> {
         queryResultSet = [];
         tempSearchStore = [];
       });
+      return; // Early return if search value is empty
     }
+
     setState(() {
       search = true;
     });
+
     var capitalizedValue =
         value.substring(0, 1).toUpperCase() + value.substring(1);
+
+    // Check if the query result set is empty and if the length of the input is 1
     if (queryResultSet.length == 0 && value.length == 1) {
       DatabaseMethods().Search(value).then((QuerySnapshot docs) {
         for (int i = 0; i < docs.docs.length; ++i) {
-          queryResultSet.add(docs.docs[i].data());
+          // Filter out the current user's username
+          if (docs.docs[i]["username"] != myUserName) {
+            queryResultSet.add(docs.docs[i].data());
+          }
         }
+        setState(() {}); // Update state after fetching data
       });
     } else {
-      tempSearchStore = [];
+      tempSearchStore = []; // Reset temp search store
       queryResultSet.forEach(
         (element) {
-          if (element["username"].startsWith(capitalizedValue)) {
+          // Ensure we don't include the current user's username in search results
+          if (element["username"].startsWith(capitalizedValue) &&
+              element["username"] != myUserName) {
             setState(() {
               tempSearchStore.add(element);
             });
@@ -107,7 +118,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF553370),
+      backgroundColor: const Color.fromARGB(207, 26, 94, 242),
       body: Container(
         child: Column(
           children: [
@@ -149,7 +160,7 @@ class _HomeState extends State<Home> {
                     },
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: const Color(0xFF3a2144),
+                      backgroundColor: const Color.fromARGB(207, 26, 94, 242),
                       shape: const CircleBorder(), // Make the button circular
                       padding:
                           const EdgeInsets.all(8), // Icon color (foreground)
@@ -368,7 +379,9 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
                   : Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
-                        border: Border.all(color: Colors.purple, width: 3),
+                        border: Border.all(
+                            color: const Color.fromARGB(207, 26, 94, 242),
+                            width: 3),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(50),
@@ -388,7 +401,7 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
                     Text(
                       username,
                       style: const TextStyle(
-                        color: Color(0xFF3a2144),
+                        color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -419,7 +432,7 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
                   const SizedBox(height: 10),
                   const Icon(
                     Icons.chevron_right,
-                    color: Colors.purple,
+                    color: Color.fromARGB(207, 26, 94, 242),
                     size: 28,
                   ),
                 ],

@@ -51,7 +51,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                    colors: [Color(0xFF7f30fe), Color(0xFF6380fb)],
+                    colors: [Color(0xFF4A90E2), Color(0xFF007AFF)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight),
                 borderRadius: BorderRadius.vertical(
@@ -73,11 +73,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const Center(
+                  Center(
                     child: Text(
                       "Enter your Email",
                       style: TextStyle(
-                          color: Color(0xFFbbb0ff),
+                          color: Colors.blue[200],
                           fontSize: 18,
                           fontWeight: FontWeight.w500),
                     ),
@@ -121,7 +121,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                               vertical: 15),
                                       prefixIcon: const Icon(
                                         Icons.mail_outlined,
-                                        color: Color(0xFF7f30fe),
+                                        color: Color.fromARGB(255, 26, 95, 242),
                                       ),
                                       hintText: "Enter your email",
                                       enabledBorder: OutlineInputBorder(
@@ -173,11 +173,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                           vertical: 12,
                                           horizontal: 28,
                                         ),
-                                        backgroundColor:
-                                            const Color(0xFF6380fb),
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 26, 95, 242),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(10),
+                                              BorderRadius.circular(20),
                                         ),
                                         shadowColor: Colors.black,
                                         elevation: 8,
@@ -220,7 +220,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         child: const Text(
                           "Sign Up Now!",
                           style: TextStyle(
-                              color: Color(0xFF7f30fe),
+                              color: Color.fromARGB(255, 26, 95, 242),
                               fontWeight: FontWeight.bold,
                               fontSize: 18),
                         ),

@@ -24,8 +24,15 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> getUserInfo() async {
-    myName = await SharedPreferenceHelperf().getDisplayName();
-    myEmail = await SharedPreferenceHelperf().getUserEmail();
+    // Await the result of getCurrentUser() to get the User object
+    var user = await AuthMethods().getcurrentUser();
+
+    // Now you can safely access user properties like email
+    if (user != null) {
+      myEmail = user.email; // Correctly accessing the email property
+    }
+
+    myName = await SharedPreferenceHelperf().getUserName();
     myImageUrl = await SharedPreferenceHelperf().getUserPic();
     myImageFile = await _getImageFromPreferences();
     setState(() {});
@@ -213,7 +220,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const SizedBox(height: 10),
                     ListTile(
-                      title: Text('Name: ${myName ?? 'Not set'}'),
+                      title: Text('UserName: ${myName ?? 'Not set'}'),
                       trailing: const Icon(Icons.edit),
                       onTap: () {
                         // Implement edit name functionality

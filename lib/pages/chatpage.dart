@@ -299,7 +299,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF553370),
+      backgroundColor: const Color.fromARGB(255, 26, 94, 242),
       // ignore: avoid_unnecessary_containers
       body: Container(
         child: Stack(

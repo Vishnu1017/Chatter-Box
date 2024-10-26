@@ -5,8 +5,6 @@ import 'package:chatter_box/service/database.dart';
 import 'package:chatter_box/service/shared_pref.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// ignore: unused_import
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class SignIn extends StatefulWidget {
@@ -20,12 +18,17 @@ class _SignInState extends State<SignIn> {
   final _formkey = GlobalKey<FormState>();
 
   bool _isPasswordHidden = true;
+  bool _isLoading = false; // New loading state
   String email = "", password = "", name = "", pic = "", username = "", id = "";
-  TextEditingController useremailController = new TextEditingController();
-  TextEditingController userpasswordController = new TextEditingController();
+  TextEditingController useremailController = TextEditingController();
+  TextEditingController userpasswordController = TextEditingController();
 
   userLogin() async {
     try {
+      setState(() {
+        _isLoading = true; // Start loading
+      });
+
       // Sign in with email and password
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
@@ -42,9 +45,9 @@ class _SignInState extends State<SignIn> {
 
       // Save each piece of information in shared preferences
       await SharedPreferenceHelperf().saveUserDisplayName(name);
-      await SharedPreferenceHelperf().saveUserName(username); // Save username
-      await SharedPreferenceHelperf().saveUserId(id); // Save user ID
-      await SharedPreferenceHelperf().saveUserPic(pic); // Save profile pic URL
+      await SharedPreferenceHelperf().saveUserName(username);
+      await SharedPreferenceHelperf().saveUserId(id);
+      await SharedPreferenceHelperf().saveUserPic(pic);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -66,6 +69,9 @@ class _SignInState extends State<SignIn> {
                     profileurl: pic,
                   )));
     } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -87,6 +93,10 @@ class _SignInState extends State<SignIn> {
           ),
         );
       }
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading in any case
+      });
     }
   }
 
@@ -101,7 +111,7 @@ class _SignInState extends State<SignIn> {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                    colors: [Color(0xFF7f30fe), Color(0xFF6380fb)],
+                    colors: [Color(0xFF4A90E2), Color(0xFF007AFF)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight),
                 borderRadius: BorderRadius.vertical(
@@ -116,18 +126,18 @@ class _SignInState extends State<SignIn> {
                 children: [
                   const Center(
                     child: Text(
-                      "SigIn",
+                      "SignIn",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const Center(
+                  Center(
                     child: Text(
                       "Login to your account",
                       style: TextStyle(
-                          color: Color(0xFFbbb0ff),
+                          color: Colors.blue[200],
                           fontSize: 18,
                           fontWeight: FontWeight.w500),
                     ),
@@ -171,7 +181,7 @@ class _SignInState extends State<SignIn> {
                                               vertical: 15),
                                       prefixIcon: const Icon(
                                         Icons.mail_outlined,
-                                        color: Color(0xFF7f30fe),
+                                        color: Color.fromARGB(255, 26, 95, 242),
                                       ),
                                       hintText: "Enter your email",
                                       enabledBorder: OutlineInputBorder(
@@ -185,7 +195,8 @@ class _SignInState extends State<SignIn> {
                                         borderRadius: BorderRadius.circular(5),
                                         borderSide: const BorderSide(
                                           width: 1,
-                                          color: Color(0xFF7f30fe),
+                                          color:
+                                              Color.fromARGB(255, 26, 95, 242),
                                         ),
                                       ),
                                       errorBorder: OutlineInputBorder(
@@ -225,8 +236,8 @@ class _SignInState extends State<SignIn> {
                                           const EdgeInsets.symmetric(
                                               vertical: 15),
                                       prefixIcon: const Icon(
-                                        Icons.password, // Changed to lock icon
-                                        color: Color(0xFF7f30fe),
+                                        Icons.password,
+                                        color: Color.fromARGB(255, 26, 95, 242),
                                       ),
                                       hintText: "Enter your password",
                                       enabledBorder: OutlineInputBorder(
@@ -240,7 +251,8 @@ class _SignInState extends State<SignIn> {
                                         borderRadius: BorderRadius.circular(5),
                                         borderSide: const BorderSide(
                                           width: 1,
-                                          color: Color(0xFF7f30fe),
+                                          color:
+                                              Color.fromARGB(255, 26, 95, 242),
                                         ),
                                       ),
                                       errorBorder: OutlineInputBorder(
@@ -255,7 +267,8 @@ class _SignInState extends State<SignIn> {
                                           _isPasswordHidden
                                               ? Icons.visibility_off_outlined
                                               : Icons.visibility,
-                                          color: const Color(0xFF7f30fe),
+                                          color: const Color.fromARGB(
+                                              255, 26, 95, 242),
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -280,57 +293,76 @@ class _SignInState extends State<SignIn> {
                                     child: TextButton(
                                       onPressed: () {
                                         Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const ForgotPassword()));
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const ForgotPassword(),
+                                          ),
+                                        );
                                       },
                                       child: const Text(
-                                        "Forget Password?",
+                                        "Forgot Password?",
                                         style: TextStyle(
-                                          color: Color(0xFF7f30fe),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                            color: Color.fromARGB(
+                                                255, 26, 95, 242),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 40),
+                                  const SizedBox(height: 20),
                                   Center(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_formkey.currentState!.validate()) {
-                                          setState(() {
-                                            email = useremailController.text;
-                                            password =
-                                                userpasswordController.text;
-                                          });
-                                        }
-                                        userLogin();
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                          horizontal: 28,
-                                        ),
-                                        backgroundColor:
-                                            const Color(0xFF6380fb),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        shadowColor: Colors.black,
-                                        elevation: 8,
-                                      ),
-                                      child: const Text(
-                                        "Sign In",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
+                                    child:
+                                        _isLoading // Show loading indicator if _isLoading is true
+                                            ? Container(
+                                                width: 60, // Custom width
+                                                height: 60, // Custom height
+                                                child:
+                                                    const CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                              Color>(
+                                                          Colors
+                                                              .blue), // Custom color
+                                                  strokeWidth:
+                                                      6.0, // Custom stroke width
+                                                ),
+                                              )
+                                            : ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                  ),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    vertical: 12,
+                                                    horizontal: 38,
+                                                  ),
+                                                  backgroundColor:
+                                                      const Color.fromARGB(
+                                                          255, 26, 95, 242),
+                                                ),
+                                                onPressed: () {
+                                                  if (_formkey.currentState!
+                                                      .validate()) {
+                                                    email = useremailController
+                                                        .text;
+                                                    password =
+                                                        userpasswordController
+                                                            .text;
+                                                    userLogin();
+                                                  }
+                                                },
+                                                child: const Text(
+                                                  "Sign In",
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
                                   ),
                                 ],
                               ),
@@ -340,33 +372,38 @@ class _SignInState extends State<SignIn> {
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Don't have an account?",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Don't have an account?",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const SignUp()));
-                        },
-                        child: const Text(
-                          "Sign Up Now!",
-                          style: TextStyle(
-                              color: Color(0xFF7f30fe),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18),
+                                builder: (context) => const SignUp(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            "Sign Up",
+                            style: TextStyle(
+                                color: Color.fromARGB(
+                                    255, 26, 95, 242), // Button text color
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18),
+                          ),
                         ),
-                      ),
-                    ],
-                  )
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
