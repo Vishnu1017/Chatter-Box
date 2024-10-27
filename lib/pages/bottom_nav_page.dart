@@ -1,5 +1,6 @@
 import 'package:chatter_box/pages/home.dart';
 import 'package:chatter_box/pages/settings_page.dart';
+import 'package:chatter_box/pages/status_page.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavBarPage extends StatefulWidget {
@@ -28,7 +29,7 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
     super.initState();
     _pages = [
       const Home(),
-      const Center(child: Text('Status')),
+      const Status(),
       const Center(child: Text('Calls')),
       const SettingsPage(),
     ];

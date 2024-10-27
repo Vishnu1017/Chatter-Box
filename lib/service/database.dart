@@ -95,4 +95,30 @@ class DatabaseMethods {
       print("Error deleting chat room: $e");
     }
   }
+
+  Future<void> uploadStatus(String name, String username, String profilePic,
+      String status, String? imageUrl) async {
+    await FirebaseFirestore.instance.collection("statuses").add({
+      "Name": name,
+      "username": username,
+      "Photo": profilePic,
+      "status": status,
+      "imageUrl": imageUrl, // Make sure this is correctly included
+      "lastUpdated": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Stream<QuerySnapshot<Object?>> getStatuses() {
+    return FirebaseFirestore.instance
+        .collection("statuses")
+        .orderBy("lastUpdated", descending: true)
+        .snapshots();
+  }
+
+  Future<void> deleteStatus(String statusId) async {
+    await FirebaseFirestore.instance
+        .collection("statuses")
+        .doc(statusId)
+        .delete();
+  }
 }

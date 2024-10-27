@@ -4,8 +4,10 @@ import 'package:chatter_box/service/database.dart';
 import 'package:chatter_box/service/shared_pref.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
+import 'package:share_plus/share_plus.dart';
 
 // ignore: must_be_immutable
 class ChatPage extends StatefulWidget {
@@ -56,74 +58,209 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  Widget chatMessageTile(String message, bool sendByMe, String time) {
-    return Column(
-      crossAxisAlignment:
-          sendByMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment:
-              sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10), // Added vertical padding for better spacing
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(25),
-                    topRight: const Radius.circular(25),
-                    bottomRight: sendByMe
-                        ? const Radius.circular(0)
-                        : const Radius.circular(25),
-                    bottomLeft: sendByMe
-                        ? const Radius.circular(25)
-                        : const Radius.circular(0),
-                  ),
-                  color: sendByMe
-                      ? const Color(0xFFE9EDEF)
-                      : const Color(
-                          0xFF70A1FF), // Color for sender and receiver
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black
-                          .withOpacity(0.1), // Slightly darker shadow for depth
-                      offset: const Offset(1,
-                          3), // Adjusted shadow offset for a more realistic effect
-                      blurRadius: 6,
+  Widget chatMessageTile(String message, bool sendByMe, String time,
+      BuildContext context, DocumentSnapshot ds) {
+    return GestureDetector(
+      onLongPress: () => _showOptions(context, ds),
+      child: Column(
+        crossAxisAlignment:
+            sendByMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment:
+                sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(25),
+                      topRight: const Radius.circular(25),
+                      bottomRight: sendByMe
+                          ? const Radius.circular(0)
+                          : const Radius.circular(25),
+                      bottomLeft: sendByMe
+                          ? const Radius.circular(25)
+                          : const Radius.circular(0),
                     ),
-                  ],
-                ),
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    color: sendByMe ? Colors.black87 : Colors.white,
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.w500, // Increased weight for emphasis
-                    fontStyle: FontStyle.italic,
+                    color: sendByMe
+                        ? const Color(0xFFE9EDEF)
+                        : const Color(0xFF70A1FF),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        offset: const Offset(1, 3),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                      color: sendByMe ? Colors.black87 : Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ),
               ),
+            ],
+          ),
+          Padding(
+            padding: sendByMe
+                ? const EdgeInsets.only(right: 16.0, top: 2.0)
+                : const EdgeInsets.only(left: 16.0, top: 2.0),
+            child: Text(
+              time,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOptions(BuildContext context, DocumentSnapshot ds) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(40)), // More rounded corners
+      ),
+      backgroundColor:
+          Colors.transparent, // Keep background transparent for gradient
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: 450, // Adjusted height
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.blue.shade800,
+                Colors.blue.shade400
+              ], // Bright gradient
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 15,
+                offset: Offset(0, 10), // Shadow effect
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Select an Action',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildUniqueCard(context, Icons.edit, 'Edit', Colors.orange,
+                        () {
+                      Navigator.pop(context);
+                      // Handle edit action
+                    }),
+                    _buildUniqueCard(
+                        context, Icons.delete, 'Delete', Colors.red, () {
+                      FirebaseFirestore.instance
+                          .collection('messages')
+                          .doc(ds.id)
+                          .delete();
+                      Navigator.pop(context);
+                    }),
+                    _buildUniqueCard(context, Icons.copy, 'Copy', Colors.green,
+                        () {
+                      Clipboard.setData(ClipboardData(text: ds['message']));
+                      Navigator.pop(context);
+                    }),
+                    _buildUniqueCard(
+                        context, Icons.share, 'Share', Colors.purple, () {
+                      Share.share(ds['message']);
+                      Navigator.pop(context);
+                    }),
+                    _buildUniqueCard(
+                        context,
+                        Icons.favorite,
+                        'Mark as Favorite',
+                        const Color.fromARGB(255, 187, 169, 0), () {
+                      FirebaseFirestore.instance
+                          .collection('favorites')
+                          .add({'message': ds['message']});
+                      Navigator.pop(context);
+                    }),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildUniqueCard(BuildContext context, IconData icon, String title,
+      Color iconColor, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9), // Slightly opaque background
+          borderRadius: BorderRadius.circular(55), // Rounded corners
+          border: Border.all(color: iconColor, width: 2), // Colorful border
+          boxShadow: [
+            const BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+              offset: Offset(0, 4),
             ),
           ],
         ),
-        Padding(
-          padding: sendByMe
-              ? const EdgeInsets.only(right: 16.0, top: 2.0)
-              : const EdgeInsets.only(left: 16.0, top: 2.0),
-          child: Text(
-            time,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
-              fontWeight: FontWeight.w400, // Slightly bolder for readability
-            ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: iconColor, // Colorful icon background
+                child: Icon(icon, color: Colors.white, size: 25), // White icon
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -147,9 +284,10 @@ class _ChatPageState extends State<ChatPage> {
                 currentMessageDate = timestamp.toDate();
               }
 
+              // Set formatted time; use "Just Now" or a similar message if timestamp is null
               String formattedTime = currentMessageDate != null
                   ? formatTime(currentMessageDate)
-                  : "Unknown Time";
+                  : "Just Now"; // Default display for messages without a valid timestamp
 
               // Check if the message has a valid date
               if (currentMessageDate != null) {
@@ -180,15 +318,20 @@ class _ChatPageState extends State<ChatPage> {
                     chatMessageTile(
                       ds["message"],
                       myUserName == ds["sendBy"],
-                      formattedTime,
+                      formattedTime, // Display formatted time
+                      context, // Pass context for options
+                      ds, // Pass document snapshot for actions
                     ),
                   ],
                 );
               } else {
+                // Display message immediately even without a valid timestamp
                 return chatMessageTile(
                   ds["message"],
                   myUserName == ds["sendBy"],
-                  formattedTime,
+                  formattedTime, // Display the default time ("Just Now")
+                  context, // Pass context for options
+                  ds, // Pass document snapshot for actions
                 );
               }
             },
