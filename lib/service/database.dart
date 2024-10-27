@@ -96,15 +96,22 @@ class DatabaseMethods {
     }
   }
 
-  Future<void> uploadStatus(String name, String username, String profilePic,
-      String status, String? imageUrl) async {
-    await FirebaseFirestore.instance.collection("statuses").add({
-      "Name": name,
-      "username": username,
-      "Photo": profilePic,
-      "status": status,
-      "imageUrl": imageUrl, // Make sure this is correctly included
-      "lastUpdated": FieldValue.serverTimestamp(),
+  Future<void> uploadStatus(
+    String name,
+    String username,
+    String profilePic,
+    String statusText,
+    String? imageUrl,
+    DateTime lastUpdated, // Add this parameter
+  ) async {
+    // Assuming 'statuses' is your Firestore collection
+    await FirebaseFirestore.instance.collection('statuses').add({
+      'Name': name,
+      'username': username,
+      'Photo': profilePic,
+      'status': statusText,
+      'imageUrl': imageUrl,
+      'lastUpdated': lastUpdated, // Save lastUpdated in Firestore
     });
   }
 

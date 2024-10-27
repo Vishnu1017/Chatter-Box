@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:chatter_box/service/database.dart';
 import 'package:chatter_box/service/shared_pref.dart';
+import 'package:intl/intl.dart';
 
 class Status extends StatefulWidget {
   const Status({Key? key}) : super(key: key);
@@ -49,22 +50,20 @@ class _StatusState extends State<Status> {
       builder: (context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Rounded corners
+            borderRadius: BorderRadius.circular(20),
           ),
-          backgroundColor: Colors
-              .transparent, // Make the background transparent for gradient
+          backgroundColor: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.blue[300]!,
-                  Colors.blue[900]!
-                ], // Gradient background
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius:
-                  BorderRadius.circular(20), // Match the dialog border
+              color: Colors.blueAccent,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                const BoxShadow(
+                  color: Colors.black54,
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -75,7 +74,7 @@ class _StatusState extends State<Status> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white, // Title color
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -83,15 +82,15 @@ class _StatusState extends State<Status> {
                   controller: statusController,
                   decoration: InputDecoration(
                     hintText: "Enter your status",
-                    hintStyle:
-                        const TextStyle(color: Colors.white60), // Hint color
+                    hintStyle: const TextStyle(color: Colors.white60),
+                    filled: true,
+                    fillColor: Colors.white10,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.black),
+                      borderSide: BorderSide.none,
                     ),
                   ),
-                  style:
-                      const TextStyle(color: Colors.white), // Input text color
+                  style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 15),
                 _imageFile != null
@@ -121,28 +120,24 @@ class _StatusState extends State<Status> {
                           TextButton(
                             onPressed: () {
                               setState(() {
-                                _imageFile = null; // Reset the image
+                                _imageFile = null;
                               });
                             },
                             child: const Text(
                               "Remove Image",
-                              style: TextStyle(
-                                  color:
-                                      Colors.redAccent), // Remove button color
+                              style: TextStyle(color: Colors.redAccent),
                             ),
                           ),
                         ],
                       )
                     : const Text(
                         "No image selected",
-                        style: TextStyle(
-                            color: Colors.white), // No image text color
+                        style: TextStyle(color: Colors.white),
                       ),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Button to pick an image
                     ElevatedButton(
                       onPressed: () async {
                         final ImagePicker _picker = ImagePicker();
@@ -154,7 +149,6 @@ class _StatusState extends State<Status> {
                         if (pickedFile != null) {
                           setState(() {
                             _imageFile = File(pickedFile.path);
-                            print("Picked image file: ${_imageFile!.path}");
                           });
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -164,18 +158,16 @@ class _StatusState extends State<Status> {
                       },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.blue,
-                        backgroundColor: Colors.white, // Text color
+                        backgroundColor: Colors.white,
                       ),
                       child: const Text("Pick Image"),
                     ),
-                    // Button to upload status
                     ElevatedButton(
                       onPressed: () async {
                         String statusText = statusController.text.trim();
                         if (statusText.isNotEmpty || _imageFile != null) {
-                          String? imageUrl; // Variable to hold the image URL
+                          String? imageUrl;
 
-                          // Upload the image to Firebase Storage
                           if (_imageFile != null) {
                             try {
                               final storageRef = FirebaseStorage.instance
@@ -183,11 +175,8 @@ class _StatusState extends State<Status> {
                                   .child(
                                       'statuses/${DateTime.now().millisecondsSinceEpoch}.png');
 
-                              // Upload the file
                               await storageRef.putFile(_imageFile!);
-                              // Get the download URL
                               imageUrl = await storageRef.getDownloadURL();
-                              print("Image uploaded successfully: $imageUrl");
                             } catch (e) {
                               print("Error uploading image: $e");
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -195,23 +184,23 @@ class _StatusState extends State<Status> {
                                     content:
                                         Text("Failed to upload image: $e")),
                               );
-                              return; // Exit if upload fails
+                              return;
                             }
                           }
 
-                          // Upload status text and image URL to Firestore
                           try {
                             await DatabaseMethods().uploadStatus(
                               myName!,
                               myUserName!,
                               myProfilePic!,
                               statusText,
-                              imageUrl, // Pass the image URL (as a string or null)
+                              imageUrl,
+                              DateTime.now(), // Add timestamp here
                             );
-                            Navigator.pop(context); // Close the dialog
-                            statusController.clear(); // Clear input field
+                            Navigator.pop(context);
+                            statusController.clear();
                             setState(() {
-                              _imageFile = null; // Reset the image
+                              _imageFile = null;
                             });
                           } catch (e) {
                             print("Error uploading status: $e");
@@ -230,21 +219,20 @@ class _StatusState extends State<Status> {
                       },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.blue,
-                        backgroundColor: Colors.white, // Text color
+                        backgroundColor: Colors.white,
                       ),
                       child: const Text("Upload"),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                // Cancel Button
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context); // Close the dialog
+                    Navigator.pop(context);
                   },
                   child: const Text(
                     "Cancel",
-                    style: TextStyle(color: Colors.white), // Cancel text color
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
@@ -264,8 +252,8 @@ class _StatusState extends State<Status> {
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Color.fromARGB(255, 64, 161, 246), // Light Blue
-                Color.fromARGB(255, 8, 85, 163), // Darker Blue
+                Color.fromARGB(255, 64, 161, 246),
+                Color.fromARGB(255, 8, 85, 163),
               ],
               begin: Alignment.bottomRight,
               end: Alignment.topLeft,
@@ -294,10 +282,20 @@ class _StatusState extends State<Status> {
             return const Center(child: Text("No statuses available"));
           }
 
+          final now = DateTime.now();
+          final recentStatuses = snapshot.data!.docs.where((doc) {
+            DateTime lastUpdated = (doc["lastUpdated"] as Timestamp).toDate();
+            return now.difference(lastUpdated).inHours < 24;
+          }).toList();
+
+          if (recentStatuses.isEmpty) {
+            return const Center(child: Text("No recent statuses"));
+          }
+
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+            itemCount: recentStatuses.length,
             itemBuilder: (context, index) {
-              DocumentSnapshot ds = snapshot.data!.docs[index];
+              DocumentSnapshot ds = recentStatuses[index];
               String statusId = ds.id;
 
               return Dismissible(
@@ -330,6 +328,15 @@ class _StatusState extends State<Status> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: showStatusDialog,
+        backgroundColor: Colors.blueAccent,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+      ),
     );
   }
 }
@@ -340,7 +347,7 @@ class StatusListTile extends StatelessWidget {
   final String username;
   final String profilePic;
   final String status;
-  final Timestamp? lastUpdated;
+  final Timestamp? lastUpdated; // Nullable Timestamp
   final String? imageUrl;
 
   const StatusListTile({
@@ -355,47 +362,92 @@ class StatusListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(profilePic),
-        radius: 30,
+    // Format the lastUpdated time to 12-hour format
+    String formattedTime = lastUpdated != null
+        ? DateFormat('hh:mm a')
+            .format(lastUpdated!.toDate()) // Format to 12-hour
+        : "Unknown time";
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Colors.blueAccent, Colors.purpleAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
-      title: Text(name),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(status),
-          if (imageUrl != null && imageUrl!.isNotEmpty)
-            Image.network(imageUrl!,
-                height: 100, width: 100, fit: BoxFit.cover),
-        ],
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            lastUpdated != null
-                ? "${lastUpdated!.toDate().hour}:${lastUpdated!.toDate().minute}"
-                : "Unknown time",
-            style: const TextStyle(fontSize: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(16),
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(profilePic),
+            radius: 26,
           ),
-        ],
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => StatusDetailPage(
-              name: name,
-              username: username,
-              profilePic: profilePic,
-              status: status,
-              imageUrl: imageUrl,
-              lastUpdated: lastUpdated,
+          title: Text(
+            name,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.white,
             ),
           ),
-        );
-      },
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                status,
+                style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600),
+              ),
+              if (imageUrl != null && imageUrl!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      imageUrl!,
+                      height: 100,
+                      width: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                formattedTime, // Display the formatted time here
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StatusDetailPage(
+                  name: name,
+                  username: username,
+                  profilePic: profilePic,
+                  status: status,
+                  imageUrl: imageUrl,
+                  lastUpdated: lastUpdated,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -548,12 +600,12 @@ class StatusDetailPage extends StatelessWidget {
                           ),
                         ),
                         // Overlay Text
-                        Positioned(
+                        const Positioned(
                           bottom: 10,
                           left: 10,
                           child: Text(
                             'Status Image',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
