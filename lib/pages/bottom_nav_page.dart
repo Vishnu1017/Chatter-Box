@@ -1,6 +1,7 @@
 import 'package:chatter_box/pages/home.dart';
 import 'package:chatter_box/pages/settings_page.dart';
 import 'package:chatter_box/pages/status_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavBarPage extends StatefulWidget {
@@ -20,7 +21,7 @@ class BottomNavBarPage extends StatefulWidget {
 }
 
 class _BottomNavBarPageState extends State<BottomNavBarPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1; // Set initial index to Chats (1)
 
   late List<Widget> _pages;
 
@@ -28,9 +29,8 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
   void initState() {
     super.initState();
     _pages = [
-      const Home(),
       const Status(),
-      const Center(child: Text('Calls')),
+      const Home(), // Chats page is now Home
       const SettingsPage(),
     ];
   }
@@ -46,18 +46,18 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
     switch (index) {
       case 0:
         return _selectedIndex == 0
-            ? Icons.chat_bubble
-            : Icons.chat_bubble_outline;
+            ? CupertinoIcons.photo_camera_solid // Filled icon for Status
+            : CupertinoIcons.camera; // Outlined icon for Status
       case 1:
         return _selectedIndex == 1
-            ? Icons.camera_alt
-            : Icons.camera_alt_outlined;
+            ? CupertinoIcons.chat_bubble_2_fill
+            : CupertinoIcons.chat_bubble_2; // Chats icon
       case 2:
-        return _selectedIndex == 2 ? Icons.call : Icons.call_outlined;
-      case 3:
-        return _selectedIndex == 3 ? Icons.settings : Icons.settings_outlined;
+        return _selectedIndex == 2
+            ? CupertinoIcons.settings
+            : CupertinoIcons.settings_solid; // Settings icon
       default:
-        return Icons.error; // Fallback icon
+        return CupertinoIcons.exclamationmark; // Fallback icon
     }
   }
 
@@ -82,17 +82,15 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
           ],
         ),
         child: BottomNavigationBar(
-          items: List.generate(4, (index) {
+          items: List.generate(3, (index) {
             return BottomNavigationBarItem(
               icon: Icon(
                   _getIcon(index)), // Use the helper function to get the icon
               label: index == 0
-                  ? 'Chats'
+                  ? 'Status'
                   : index == 1
-                      ? 'Status'
-                      : index == 2
-                          ? 'Calls'
-                          : 'Settings',
+                      ? 'Chats'
+                      : 'Settings',
             );
           }),
           currentIndex: _selectedIndex,
@@ -107,9 +105,9 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
           unselectedFontSize: 14,
           backgroundColor: Colors.blue[800], // Blue background
           selectedIconTheme:
-              IconThemeData(size: 35), // Increase icon size for selected
+              const IconThemeData(size: 35), // Increase icon size for selected
           unselectedIconTheme:
-              IconThemeData(size: 25), // Default size for unselected
+              const IconThemeData(size: 25), // Default size for unselected
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold, // Bold font for selected label
             color: Colors.white,

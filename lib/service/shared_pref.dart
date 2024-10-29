@@ -51,8 +51,7 @@ class SharedPreferenceHelperf {
 
   Future<String?> getUserPic() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(
-        userPicKey); // This method retrieves the user profile picture
+    return prefs.getString(userPicKey);
   }
 
   Future<String?> getDisplayName() async {

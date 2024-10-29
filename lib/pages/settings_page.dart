@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:chatter_box/pages/signin.dart';
 import 'package:chatter_box/service/auth.dart';
@@ -24,18 +26,17 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> getUserInfo() async {
-    // Await the result of getCurrentUser() to get the User object
     var user = await AuthMethods().getcurrentUser();
 
-    // Now you can safely access user properties like email
     if (user != null) {
-      myEmail = user.email; // Correctly accessing the email property
+      myEmail = user.email;
     }
 
     myName = await SharedPreferenceHelperf().getUserName();
     myImageUrl = await SharedPreferenceHelperf().getUserPic();
     myImageFile = await _getImageFromPreferences();
-    setState(() {});
+
+    setState(() {}); // Ensure UI refresh after getting user info
   }
 
   Future<File?> _getImageFromPreferences() async {
@@ -60,8 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> logout(BuildContext context) async {
     try {
-      await AuthMethods().SignOut(); // Corrected to match your AuthMethods
-      // Show success message
+      await AuthMethods().SignOut();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content:
@@ -86,8 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> deleteUser(BuildContext context) async {
     try {
-      await AuthMethods().deleteuser(); // Corrected to match your AuthMethods
-      // Show success message
+      await AuthMethods().deleteuser();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("User account successfully deleted.",
@@ -112,7 +111,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
-
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -121,7 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (pickedFile != null) {
         setState(() {
           myImageFile = File(pickedFile.path);
-          myImageUrl = null; // Reset URL since a new image is selected
+          myImageUrl = null; // Clear URL since a new image is selected
         });
         await _saveImageToPreferences(pickedFile.path);
       } else {
@@ -145,8 +143,8 @@ class _SettingsPageState extends State<SettingsPage> {
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Color.fromARGB(255, 64, 161, 246), // Light Blue
-                Color.fromARGB(255, 8, 85, 163), // Darker Blue
+                Color.fromARGB(255, 64, 161, 246),
+                Color.fromARGB(255, 8, 85, 163),
               ],
               begin: Alignment.bottomRight,
               end: Alignment.topLeft,
